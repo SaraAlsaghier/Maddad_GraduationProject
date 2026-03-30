@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | الإعدادات</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="settings-page-body" onload="loadSettingsPage()">
+
+  <div class="settings-shell">
+
+    <!-- Top Bar -->
+    <header class="settings-topbar">
+      <img src="../pictures/logo.png" class="settings-top-logo" alt="شعار مدد" />
+
+      <div class="settings-top-actions">
+        <button class="settings-top-icon-btn logout-icon-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button class="settings-top-icon-btn back-icon-btn" onclick="goBackHome()" aria-label="العودة">←</button>
+      </div>
+    </header>
+
+    <main class="settings-main-layout">
+
+      <!-- Side Panel -->
+      <aside class="settings-side-panel">
+        <button class="settings-side-item" onclick="goBackHome()">
+          <div class="settings-side-icon home-side-icon">⌂</div>
+          <span>الرئيسية</span>
+        </button>
+
+        <button class="settings-side-item" onclick="window.location.href='games.html'">
+          <div class="settings-side-icon outline-side-icon">★</div>
+          <span>مساحة نمو</span>
+        </button>
+
+        <button class="settings-side-item" onclick="goDashboard()">
+          <div class="settings-side-icon outline-side-icon">★</div>
+          <span>الأداء</span>
+        </button>
+
+        <button class="settings-side-item active" onclick="window.location.href='settings.html'">
+          <div class="settings-side-icon active-side-icon">⚙</div>
+          <span>الإعدادات</span>
+        </button>
+      </aside>
+
+      <!-- Main Card -->
+      <section class="settings-main-card">
+        <h1 class="settings-title">الإعدادات</h1>
+
+        <div class="settings-info-box">
+
+  <div class="settings-row">
+    <span class="settings-label">اسم الطفل</span>
+    <span class="settings-value" id="settingsChildName">-</span>
+  </div>
+
+  <div class="settings-row">
+    <span class="settings-label">البريد الإلكتروني</span>
+    <span class="settings-value" id="settingsEmail">-</span>
+  </div>
+
+  <div class="settings-row">
+    <span class="settings-label">تاريخ إنشاء الحساب</span>
+    <span class="settings-value" id="settingsCreated">-</span>
+  </div>
+
+  <div class="settings-row">
+    <span class="settings-label">عمر الطفل</span>
+    <span class="settings-value" id="settingsChildAge">-</span>
+  </div>
+
+  <div class="settings-row">
+    <span class="settings-label">جنس الطفل</span>
+    <span class="settings-value" id="settingsChildGender">-</span>
+  </div>
+
+</div>
+       <div class="settings-btns-wrap">
+
+<button class="settings-main-btn" id="editSettingsBtn" onclick="toggleSettingsEdit()">تعديل البيانات</button>
+
+<button class="settings-secondary-btn" onclick="openAbout()">
+حول التطبيق
+</button>
+
+</div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

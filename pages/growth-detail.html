@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | تفاصيل النشاط</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="growth-page-body" onload="loadGrowthDetailPage()">
+
+  <div class="growth-shell">
+
+    <header class="growth-topbar">
+      <img src="../pictures/logo.png" class="growth-top-logo" alt="شعار مدد" />
+
+      <div class="growth-top-actions">
+        <button class="growth-top-icon-btn logout-icon-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button class="growth-top-icon-btn back-icon-btn" onclick="window.location.href='games.html'" aria-label="العودة">←</button>
+      </div>
+    </header>
+
+    <main class="growth-detail-wrap">
+
+      <aside class="growth-side-panel">
+        <button class="growth-side-item" onclick="goBackHome()">
+          <div class="growth-side-icon home-side-icon">⌂</div>
+          <span>الرئيسية</span>
+        </button>
+
+        <button class="growth-side-item active" onclick="window.location.href='games.html'">
+          <div class="growth-side-icon active-side-icon">★</div>
+          <span>مساحة نمو</span>
+        </button>
+
+        <button class="growth-side-item" onclick="goDashboard()">
+          <div class="growth-side-icon outline-side-icon">★</div>
+          <span>الأداء</span>
+        </button>
+      </aside>
+
+      <section class="growth-detail-card">
+        <div class="growth-detail-header">
+          <button class="growth-detail-back" onclick="window.location.href='games.html'">←</button>
+          <div class="growth-detail-page-title">مساحة نمو</div>
+        </div>
+
+        <h1 class="growth-detail-main-title">الأنشطة المقترحة:</h1>
+
+        <div class="growth-detail-content">
+          <img id="growthDetailImage" class="growth-detail-image" src="" alt="" />
+
+          <div class="growth-detail-textbox">
+            <h2 id="growthDetailSkill" class="growth-detail-skill"></h2>
+            <p id="growthDetailText" class="growth-detail-text"></p>
+            <button id="growthDetailBtn" class="growth-detail-btn">ابدأ الآن</button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

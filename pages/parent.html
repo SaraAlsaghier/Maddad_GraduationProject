@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | ولي الأمر</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="parent-page-body">
+
+  <div class="parent-page-wrap">
+    <div class="parent-auth-card">
+
+      <img src="../pictures/logo.png" class="parent-logo" alt="شعار مدد" />
+
+      <h1 class="parent-title">ولي الأمر</h1>
+      <p class="parent-subtitle">سجّل الدخول أو أنشئ حسابًا جديدًا لمتابعة طفلك</p>
+
+      <!-- Login Box -->
+      <div id="loginBox">
+        <div class="parent-form-group">
+          <label for="parentLoginEmail">البريد الإلكتروني</label>
+          <input
+            type="email"
+            id="parentLoginEmail"
+            class="parent-input"
+            placeholder="example@email.com"
+            maxlength="100"
+            autocomplete="email"
+            oninput="validateEmail(this, 'loginEmailError')"
+          />
+          <span class="field-error" id="loginEmailError"></span>
+        </div>
+
+        <div class="parent-form-group">
+          <label for="parentLoginPassword">كلمة المرور</label>
+          <input
+            type="password"
+            id="parentLoginPassword"
+            class="parent-input"
+            placeholder="********"
+            minlength="8"
+            maxlength="64"
+            autocomplete="current-password"
+            oninput="validatePassword(this, 'loginPasswordError')"
+          />
+          <span class="field-error" id="loginPasswordError"></span>
+        </div>
+
+        <button class="parent-main-btn" onclick="submitLogin()">تسجيل الدخول</button>
+
+        <p class="parent-switch-text">
+          ما عندك حساب؟
+          <span class="parent-switch-link" onclick="showSignup()">إنشاء حساب</span>
+        </p>
+      </div>
+
+      <!-- Signup Box -->
+      <div id="signupBox" style="display:none;">
+        <div class="parent-form-group">
+          <label for="signupChildName">اسم الطفل</label>
+          <input
+            type="text"
+            id="signupChildName"
+            class="parent-input"
+            placeholder="مثال: لمى"
+            minlength="2"
+            maxlength="50"
+            autocomplete="off"
+            oninput="validateName(this, 'signupNameError')"
+          />
+          <span class="field-error" id="signupNameError"></span>
+        </div>
+
+        <div class="parent-form-group">
+          <label>عمر الطفل</label>
+          <div class="selection-group" id="ageSelection">
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupChildAge', '12-18', 'signupAgeError')">12 - 18 شهر</button>
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupChildAge', '19-24', 'signupAgeError')">19 - 24 شهر</button>
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupChildAge', '25-30', 'signupAgeError')">25 - 30 شهر</button>
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupChildAge', '31-36', 'signupAgeError')">31 - 36 شهر</button>
+          </div>
+          <input type="hidden" id="signupChildAge" />
+          <span class="field-error" id="signupAgeError"></span>
+        </div>
+
+        <div class="parent-form-group">
+          <label>جنس الطفل</label>
+          <div class="selection-group" id="genderSelection">
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupChildGender', 'ذكر', 'signupGenderError')">ذكر</button>
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupChildGender', 'أنثى', 'signupGenderError')">أنثى</button>
+          </div>
+          <input type="hidden" id="signupChildGender" />
+          <span class="field-error" id="signupGenderError"></span>
+        </div>
+
+        <div class="parent-form-group">
+          <label for="signupEmail">البريد الإلكتروني</label>
+          <input
+            type="email"
+            id="signupEmail"
+            class="parent-input"
+            placeholder="example@email.com"
+            maxlength="100"
+            autocomplete="email"
+            oninput="validateEmail(this, 'signupEmailError')"
+          />
+          <span class="field-error" id="signupEmailError"></span>
+        </div>
+
+        <div class="parent-form-group">
+          <label for="signupPassword">كلمة المرور</label>
+          <input
+            type="password"
+            id="signupPassword"
+            class="parent-input"
+            placeholder="********"
+            minlength="8"
+            maxlength="64"
+            autocomplete="new-password"
+            oninput="validatePassword(this, 'signupPasswordError')"
+          />
+          <span class="field-error" id="signupPasswordError"></span>
+        </div>
+
+        <button class="parent-main-btn" onclick="submitSignup()">إنشاء الحساب</button>
+
+        <p class="parent-switch-text">
+          عندك حساب؟
+          <span class="parent-switch-link" onclick="showLogin()">تسجيل الدخول</span>
+        </p>
+      </div>
+
+      <div class="parent-back-link-wrap">
+        <a href="../index.html" class="parent-back-link">العودة للصفحة الرئيسية</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

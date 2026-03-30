@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | الرئيسية</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="return-home-body" onload="loadLoginHomePage()">
+
+  <div class="return-home-shell">
+
+    <!-- Top Bar -->
+    <header class="return-home-topbar">
+      <img src="../pictures/logo.png" class="return-home-top-logo" alt="شعار مدد" />
+
+      <div class="return-topbar-left">
+        <button class="return-topbar-icon-btn logout-icon-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button class="return-topbar-icon-btn settings-icon-btn" onclick="goSettings()" aria-label="الإعدادات">⚙</button>
+      </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="return-home-main-layout">
+
+      <!-- Right Side Panel -->
+      <aside class="return-side-panel">
+        <button class="return-side-item" onclick="goGames()">
+          <div class="return-side-icon filled-icon">★</div>
+          <span>مساحة نمو</span>
+        </button>
+
+        <button class="return-side-item" onclick="goDashboard()">
+          <div class="return-side-icon outlined-icon">★</div>
+          <span>الأداء</span>
+        </button>
+      </aside>
+
+      <!-- Main Content -->
+      <section class="return-home-main-card">
+        <h1 class="return-home-title" id="welcomeTitle">أهلًا ولي أمر</h1>
+
+        <div class="return-home-info-box">
+          <div class="return-info-row">
+            <span class="return-info-label">اسم الطفل:</span>
+            <span class="return-info-value" id="childNameText">-</span>
+          </div>
+
+          <div class="return-info-row">
+            <span class="return-info-label">العمر:</span>
+            <span class="return-info-value" id="childAgeText">-</span>
+          </div>
+
+          <div class="return-info-row">
+            <span class="return-info-label">الجنس:</span>
+            <span class="return-info-value" id="childGenderText">-</span>
+          </div>
+
+          <div class="return-info-row">
+            <span class="return-info-label">البريد الإلكتروني:</span>
+            <span class="return-info-value" id="emailText">-</span>
+          </div>
+        </div>
+
+        <p class="return-home-text">
+          يمكنك من هنا متابعة بيانات طفلك، البدء بإعادة تعبئة الاستبيان، أو الانتقال إلى
+          مساحة النمو ولوحة الأداء للاطلاع على الأنشطة والنتائج.
+        </p>
+
+        <div class="return-home-btn-wrap">
+          <button class="return-home-start-btn" onclick="startQuestionnaire()">
+            ابدأ الاستبيان مرة أخرى
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

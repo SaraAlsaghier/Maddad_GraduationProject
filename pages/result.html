@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | نتيجة الاستبيان</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="result-page-body" onload="loadResultPage()">
+
+  <div class="result-shell">
+
+    <!-- Top Bar -->
+    <header class="result-topbar">
+      <img src="../pictures/logo.png" class="result-logo" alt="شعار مدد" />
+
+      <div class="result-top-actions">
+        <button class="result-icon-btn logout-icon-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button class="result-icon-btn back-icon-btn" onclick="goBackHome()" aria-label="العودة">←</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="result-main-wrap">
+      <section class="result-main-card" id="resultMainCard">
+
+        <div class="result-image-wrap">
+          <img id="resultIcon" src="../pictures/result-low.png" alt="نتيجة التقييم" class="result-main-icon" />
+        </div>
+
+        <h1 id="resultTitle" class="result-title">
+          جاري عرض النتيجة...
+        </h1>
+
+        <p id="resultText" class="result-text"></p>
+
+        <div id="resultSummary" class="result-summary"></div>
+
+        <div class="result-btns-wrap" id="resultBtnsWrap">
+          <button id="resultMainBtn" class="result-main-btn" onclick="handleResultMainAction()">
+            متابعة
+          </button>
+
+          <button id="resultSecondaryBtn" class="result-secondary-btn" onclick="goToDetailedReport()" style="display:none;">
+            تقرير مفصل
+          </button>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

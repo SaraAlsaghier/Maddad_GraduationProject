@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | تفاصيل اللعبة</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="child-detail-body" onload="loadChildGrowthDetailPage()">
+
+  <div class="child-detail-shell">
+
+    <!-- Top Bar -->
+    <header class="child-detail-topbar">
+      <button class="child-detail-back-btn" onclick="window.location.href='child.html'" aria-label="العودة">←</button>
+      <img src="../pictures/logo.png" class="child-detail-top-logo" alt="شعار مدد" />
+    </header>
+
+    <!-- Main -->
+    <main class="child-detail-main-wrap">
+      <section class="child-detail-main-card">
+
+        <h1 class="child-detail-main-title">الألعاب المقترحة</h1>
+
+        <div class="child-detail-content">
+          <img id="childDetailImage" class="child-detail-image" src="" alt="" />
+
+          <div class="child-detail-textbox">
+            <h2 id="childDetailSkill" class="child-detail-skill"></h2>
+            <p id="childDetailText" class="child-detail-text"></p>
+            <button id="childDetailBtn" class="child-detail-btn">ابدأ الآن</button>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

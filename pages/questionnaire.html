@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مدد | الاستبيان</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="questionnaire-page-body" onload="loadQuestionnairePage()">
+
+  <div class="questionnaire-shell">
+
+    <!-- Top Bar -->
+    <header class="questionnaire-topbar">
+      <img src="../pictures/logo.png" alt="شعار مدد" class="questionnaire-top-logo" />
+
+
+      
+      <div class="questionnaire-top-actions">
+        <button class="questionnaire-top-icon-btn logout-icon-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button class="questionnaire-top-icon-btn back-icon-btn" onclick="resetQuestionnaireAndGoHome()" aria-label="العودة">←</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="questionnaire-main-wrap">
+      <section class="questionnaire-main-card">
+
+        <h1 class="questionnaire-main-title">استبيان الفحص المبكر لاضطراب طيف التوحد</h1>
+
+        <div class="questionnaire-progress" id="questionProgress">السؤال: 1/10</div>
+
+        <div class="questionnaire-card">
+          <h2 class="questionnaire-question" id="questionTitle">الاستجابة للاسم</h2>
+          <p class="questionnaire-description" id="questionDescription"></p>
+
+          <div class="questionnaire-options" id="questionOptions"></div>
+
+          <p id="questionnaireError" class="questionnaire-error"></p>
+
+          <div class="questionnaire-nav">
+            <button class="questionnaire-nav-btn primary-btn" id="prevQuestionBtn" onclick="goPrevQuestion()">السابق</button>
+            <button class="questionnaire-nav-btn primary-btn" id="nextQuestionBtn" onclick="goNextQuestion()">التالي</button>
+          </div>
+
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
