@@ -1,3 +1,35 @@
+/*
+===========================================
+  MADDAD PROJECT — script.js
+  كل منطق التطبيق في ملف واحد
+===========================================
+
+  أقسام هذا الملف (ابحث عن التعليقات):
+  
+  1. [INDEX PAGE]         ← دوال صفحة البداية
+  2. [PARENT PAGE]        ← تسجيل الدخول وإنشاء الحساب
+  3. [HOME NEW PAGE]      ← الصفحة الرئيسية (بعد التسجيل أول مرة)
+  4. [HOME LOGIN PAGE]    ← الصفحة الرئيسية (بعد الدخول)
+  5. [QUESTIONNAIRE]      ← منطق الاستبيان العشرة أسئلة
+  6. [RESULT PAGE]        ← عرض النتيجة + رسالة التذكير للمتوسط
+  7. [FOLLOWUP PAGE]      ← أسئلة المتابعة (للخطر العالي فقط)
+  8. [GROWTH DATA]        ← بيانات مساحة النمو (ألعاب + نصائح)
+  9. [GAMES PAGE]         ← صفحة مساحة النمو
+  10. [GROWTH DETAIL]     ← تفاصيل اللعبة أو النصيحة
+  11. [CHILD PAGES]       ← صفحات الطفل
+
+  منطق التصنيف:
+  - منخفض  → لا أسئلة متابعة، يرجع للرئيسية
+  - متوسط  → لا أسئلة متابعة، يروح للألعاب مباشرة + تذكير بعد شهر
+  - عالي   → أسئلة متابعة إلزامية
+
+  ألوان التطبيق:
+  - الكحلي الأساسي: #3c5274
+  - الكحلي الفاتح:  #7a93b5  (زر السابق)
+  - الكحلي الناعم:  #c8d8ea  (خلفيات)
+===========================================
+*/
+
 /* =========================
    INDEX PAGE
 ========================= */
@@ -51,17 +83,10 @@ function validateEmail(input, errorId) {
   }
 }
 
-function validatePassword(input, errorId) {
+// mode: isSignup=true shows format rules | isSignup=false (login) just checks not empty
+function validatePassword(input, errorId, isSignup = true) {
   const error = document.getElementById(errorId);
   const value = input.value;
-
-  const rules = [
-    { test: value.length >= 8, label: "8 أحرف على الأقل" },
-    { test: /[A-Z]/.test(value), label: "حرف كبير (A-Z)" },
-    { test: /[a-z]/.test(value), label: "حرف صغير (a-z)" },
-    { test: /[0-9]/.test(value), label: "رقم واحد على الأقل" },
-    { test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value), label: "رمز خاص (!@#$%...)" }
-  ];
 
   if (!value) {
     error.textContent = "كلمة المرور مطلوبة";
@@ -69,10 +94,23 @@ function validatePassword(input, errorId) {
     return;
   }
 
+  // For login: server validates — skip format rules
+  if (!isSignup) {
+    error.textContent = "";
+    input.dataset.valid = "true";
+    return;
+  }
+
+  const rules = [
+    { test: value.length >= 8, label: "8 أحرف على الأقل" },
+    { test: /[A-Z]/.test(value), label: "حرف كبير (A-Z)" },
+    { test: /[a-z]/.test(value), label: "حرف صغير (a-z)" },
+    { test: /[0-9]/.test(value), label: "رقم واحد على الأقل" },
+    { test: /[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]/.test(value), label: "رمز خاص (!@#$%...)" }
+  ];
+
   const allPassed = rules.every(rule => rule.test);
   input.dataset.valid = allPassed ? "true" : "false";
-  
-  
 
   const listItems = rules.map(rule =>
     `<li style="color:${rule.test ? 'green' : 'red'};">
@@ -104,6 +142,7 @@ function submitLogin() {
   const passwordInput = document.getElementById("parentLoginPassword");
 
   validateEmail(emailInput, "loginEmailError");
+  validatePassword(passwordInput, "loginPasswordError", false);
 
   const emailValid = !document.getElementById("loginEmailError").textContent;
   const passwordValid = passwordInput.dataset.valid === "true";
@@ -151,6 +190,7 @@ async function parentSignup() {
   const childName = document.getElementById("signupChildName").value.trim();
   const childAge = document.getElementById("signupChildAge").value;
   const childGender = document.getElementById("signupChildGender").value;
+  const parentRole = document.getElementById("signupParentRole")?.value || "";
   const email = document.getElementById("signupEmail").value.trim();
   const password = document.getElementById("signupPassword").value.trim();
 
@@ -159,30 +199,42 @@ async function parentSignup() {
     return;
   }
 
-  // Try the backend API first; fall back to localStorage if unavailable
+  // Always save locally first so data is available even without backend
+  const account = {
+    childName,
+    childAge,
+    childGender,
+    parentRole,
+    email,
+    createdAt: new Date().toLocaleDateString("ar-SA"),
+  };
+  localStorage.setItem("maddadAccount", JSON.stringify(account));
+  localStorage.setItem("maddadLoggedIn", "true");
+
+  // Try the backend API
   try {
-    await apiRegister({
+    const result = await apiRegister({
       email,
       password,
       child_name: childName,
       child_age: childAge,
       child_gender: childGender,
     });
+    // Update with API response if available
+    if (result && result.child_name) {
+      account.childName = result.child_name;
+      account.childAge = result.child_age;
+      account.childGender = result.child_gender;
+      localStorage.setItem("maddadAccount", JSON.stringify(account));
+    }
   } catch (err) {
     if (err.status === 409) {
       alert("البريد الإلكتروني مستخدم بالفعل");
+      localStorage.removeItem("maddadAccount");
+      localStorage.removeItem("maddadLoggedIn");
       return;
     }
-    // Backend unavailable – cache non-sensitive profile info only (no password)
-    const account = {
-      childName,
-      childAge,
-      childGender,
-      email,
-      createdAt: new Date().toLocaleDateString("ar-SA"),
-    };
-    localStorage.setItem("maddadAccount", JSON.stringify(account));
-    localStorage.setItem("maddadLoggedIn", "true");
+    // Backend unavailable — local data already saved above, continue
   }
 
   window.location.href = "home-new.html";
@@ -199,7 +251,19 @@ async function parentLogin() {
 
   // Try the backend API first
   try {
-    await apiLogin(email, password);
+    const result = await apiLogin(email, password);
+    // Ensure account info is stored from API response
+    if (result && result.child_name) {
+      const account = {
+        childName: result.child_name,
+        childAge: result.child_age,
+        childGender: result.child_gender,
+        email: result.email || email,
+        createdAt: new Date().toLocaleDateString("ar-SA"),
+      };
+      localStorage.setItem("maddadAccount", JSON.stringify(account));
+      localStorage.setItem("maddadLoggedIn", "true");
+    }
     window.location.href = "home-login.html";
     return;
   } catch (err) {
@@ -271,7 +335,13 @@ async function loadLoginHomePage() {
   const emailText = document.getElementById("emailText");
 
   if (welcomeTitle) {
-    welcomeTitle.textContent = `أهلًا ولي أمر ${account.childName || ""}`;
+    const role = account.parentRole || "";
+    const name = account.childName || "";
+    let greeting = "أهلاً ولي الأمر";
+    if (role === "أب" && name) greeting = `أهلاً بأبو ${name}`;
+    else if (role === "أم" && name) greeting = `أهلاً بأم ${name}`;
+    else if (name) greeting = `أهلاً بك، ولي أمر ${name}`;
+    welcomeTitle.textContent = greeting;
   }
 
   if (childNameText) {
@@ -641,7 +711,7 @@ async function finishQuestionnaire() {
     mlConfidence: mlConfidence,
     resultId: resultId,
     failedSkills: failedSkills,
-    followupNeeded: (initialRisk === "medium" || initialRisk === "high"),
+    followupNeeded: (initialRisk === "high"),
     followupComplete: false,
     finalScore: score,
     finalRisk: initialRisk
@@ -725,21 +795,11 @@ function loadResultPage() {
     resultTitle.textContent =
       "تشير النتائج إلى وجود علامات قد تشير إلى احتمالية متوسطة للتوحد";
 
-    if (assessment.followupComplete) {
+    resultText.textContent =
+      "ننصح بمتابعة الأنشطة والألعاب التفاعلية لتعزيز مهارات طفلك.";
 
-      resultText.textContent =
-        "هذه النتيجة النهائية بعد أسئلة المتابعة والتي ساعدت في الوصول إلى تصنيف أكثر دقة.";
-
-      resultMainBtn.textContent = "الأنشطة المقترحة";
-      resultMainBtn.className = "result-main-btn btn-yellow";
-
-    } else {
-
-      resultText.textContent = "يُنصح بإكمال التقييم الإضافي";
-
-      resultMainBtn.textContent = "أسئلة المتابعة";
-      resultMainBtn.className = "result-main-btn btn-yellow";
-    }
+    resultMainBtn.textContent = "الأنشطة والألعاب";
+    resultMainBtn.className = "result-main-btn btn-yellow";
 
     resultSecondaryBtn.style.display = "none";
   }
@@ -779,15 +839,129 @@ function loadResultPage() {
 
 
 
+  // ── نقاط النمو: المهارات الفاشلة — فقط إذا لم تكن النتيجة منخفضة ──
+  const failedSkills = assessment.failedSkills || [];
+  const failedSkillsHTML = (shownRisk !== "low" && failedSkills.length > 0)
+    ? `<div class="result-failed-skills">
+        <strong>المهارات التي تحتاج متابعة:</strong>
+        <ul class="result-skills-list">
+          ${failedSkills.map(s => `<li>${skillLabelsArabic[s] || s}</li>`).join("")}
+        </ul>
+       </div>`
+    : "";
+
   const mlLine = (assessment.mlRisk && assessment.mlConfidence)
-    ? `<br><strong>تقدير الذكاء الاصطناعي:</strong> ${riskTextArabic(assessment.mlRisk)} (${Math.round(assessment.mlConfidence * 100)}%)`
+    ? `<div class="result-ml-line">🤖 <strong>تقدير الذكاء الاصطناعي:</strong> ${riskTextArabic(assessment.mlRisk)} (${Math.round(assessment.mlConfidence * 100)}%)</div>`
     : "";
 
   resultSummary.innerHTML = `
-    <strong>العمر:</strong> ${assessment.ageGroup} شهر تقريبًا<br>
-    <strong>مجموع الإجابات (لا):</strong> ${shownScore}<br>
-    <strong>مستوى الخطورة:</strong> ${riskTextArabic(shownRisk)}${mlLine}
+    <div class="result-summary-grid">
+      <span class="result-summary-label">العمر</span>
+      <span class="result-summary-val">${assessment.ageGroup} شهر</span>
+      <span class="result-summary-label">مستوى الاحتمالية</span>
+      <span class="result-summary-val">${riskTextArabic(shownRisk)}</span>
+    </div>
+    ${failedSkillsHTML}
+    ${mlLine}
   `;
+
+  // ── تذكير الاحتمالية المتوسطة ──────────────────────
+  if (shownRisk === "medium") {
+    _checkMediumReminder();
+  }
+}
+
+function _checkMediumReminder() {
+  const now = Date.now();
+  const stored = localStorage.getItem("maddadMediumDate");
+
+  if (!stored) {
+    // أول مرة يظهر فيها medium — نحفظ التاريخ ونعرض رسالة التذكير
+    localStorage.setItem("maddadMediumDate", String(now));
+    _showMediumReminderBanner(false);
+  } else {
+    const firstDate = parseInt(stored, 10);
+    const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
+    const isAfterMonth = (now - firstDate) >= oneMonthMs;
+
+    if (isAfterMonth) {
+      // ظهرت متوسطة بعد شهر → تصبح عالية
+      _showMediumEscalationBanner();
+    } else {
+      // لم يمر شهر بعد
+      _showMediumReminderBanner(true, firstDate);
+    }
+  }
+}
+
+function _googleCalendarUrl(targetDate) {
+  // Format date for Google Calendar: YYYYMMDDTHHmmssZ
+  const pad = n => String(n).padStart(2, '0');
+  const d = new Date(targetDate);
+  const start = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+  const end   = `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate()+1)}`;
+  const title = encodeURIComponent('إعادة استبيان مدد للكشف المبكر عن التوحد');
+  const details = encodeURIComponent('حان موعد إعادة استبيان مدد لمتابعة نمو طفلك. افتح التطبيق وأعد الاستبيان.');
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
+}
+
+function _showMediumReminderBanner(showDate, firstDate) {
+  const container = document.getElementById("resultBtnsWrap");
+  const targetTs = firstDate ? firstDate + 30 * 86400000 : Date.now() + 30 * 86400000;
+  const targetDate = new Date(targetTs);
+  const dateLabel = targetDate.toLocaleDateString("ar-SA", { year:"numeric", month:"long", day:"numeric" });
+  const calUrl = _googleCalendarUrl(targetTs);
+
+  const banner = document.createElement("div");
+  banner.className = "medium-reminder-banner";
+  banner.innerHTML = `
+    <div style="text-align:right;">
+      <strong>يحتاج طفلك إعادة الاستبيان بعد شهر</strong><br>
+      <span style="font-size:13px;opacity:0.85;">أضفه لتقويمك حتى لا تنساه، الموعد المقترح: <strong>${dateLabel}</strong></span>
+      <div style="margin-top:12px;">
+        <a href="${calUrl}" target="_blank" class="calendar-add-btn">
+          أضف للتقويم
+        </a>
+      </div>
+    </div>
+  `;
+  container.parentNode.insertBefore(banner, container);
+}
+
+function _downloadIcal(targetTs) {
+  const pad = n => String(n).padStart(2, '0');
+  const d = new Date(targetTs);
+  const d2 = new Date(targetTs + 3600000);
+  const fmt = x => x.getUTCFullYear() + pad(x.getUTCMonth()+1) + pad(x.getUTCDate()) + 'T' + pad(x.getUTCHours()) + pad(x.getUTCMinutes()) + '00Z';
+  const ical = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Maddad//AR',
+    'BEGIN:VEVENT',
+    'DTSTART:' + fmt(d),
+    'DTEND:' + fmt(d2),
+    'SUMMARY:إعادة استبيان مدد للكشف المبكر عن التوحد',
+    'DESCRIPTION:حان موعد إعادة استبيان مدد. افتح التطبيق وأعد الاستبيان لمتابعة نمو طفلك.',
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([ical], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'maddad-reminder.ics'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function _showMediumEscalationBanner() {
+  const container = document.getElementById("resultBtnsWrap");
+  const banner = document.createElement("div");
+  banner.className = "medium-escalation-banner";
+  banner.innerHTML = `
+    <span class="reminder-icon">⚠️</span>
+    <div>
+      <strong>تنبيه مهم: النتيجة لا تزال متوسطة بعد شهر</strong><br>
+      <span>ننصح بشدة بمراجعة متخصص طبي لتقييم دقيق وشامل لطفلك</span>
+    </div>
+  `;
+  container.parentNode.insertBefore(banner, container);
+  localStorage.removeItem("maddadMediumDate"); // reset for next cycle
 }
 
 function handleResultMainAction() {
@@ -799,7 +973,7 @@ function handleResultMainAction() {
 
   const shownRisk = assessment.followupComplete ? assessment.finalRisk : assessment.initialRisk;
 
-  if (!assessment.followupComplete && (shownRisk === "medium" || shownRisk === "high")) {
+  if (!assessment.followupComplete && shownRisk === "high") {
     window.location.href = "followup.html";
     return;
   }
@@ -850,16 +1024,16 @@ const FOLLOWUP_STEPS_CONFIG = {
     }
   },
 
-  response_to_name: {
-    title: "متابعة: الاستجابة للاسم",
-    question: "هل طفلك يستجيب لاسمه في مواقف أخرى حتى لو لم يكن الأمر ثابتًا؟ (مثال: قد يستجيب في الحديقة أو عند الحماس لكنه لا يستجيب أثناء مشاهدة التلفاز أو عندما يكون مركزًا على نشاط).",
-    type: "radio",
-    name: "response_to_name_followup",
-    options: [
-      { label: "نعم", value: "yes" },
-      { label: "لا", value: "no" }
-    ]
-  },
+response_to_name: {
+  title: "متابعة: الاستجابة للاسم",
+  question: "",
+  type: "radio",
+  name: "response_to_name_followup",
+  options: [
+    { label: "نعم", value: "yes" },
+    { label: "لا", value: "no" }
+  ]
+},
 
   pointing_with_finger: {
     title: "متابعة: الإشارة بالإصبع",
@@ -905,7 +1079,34 @@ const FOLLOWUP_STEPS_CONFIG = {
       { label: 'الإشارة إلى غرض مألوف ويومي (مثل كرسي أو مصباح) عندما تسأل "أين الكرسي؟"', value: "point_object" },
       { label: 'إحضار غرض مألوف ويومي (مثل ملعقة أو بطانية) عندما تطلب منهم "أحضر الملعقة"', value: "bring_object" }
     ]
-  }
+  },
+  play_skills: {
+  title: "متابعة: مهارات اللعب",
+  question: "",
+  type: "radio",
+  name: "play_skills_followup",
+  options: [
+    { label: "نعم", value: "yes" },
+    { label: "لا", value: "no" }
+  ]
+},
+
+  // ── الاستجابة للتعليمات ── (Figure A.2)
+  // إذا الجواب الأصلي "نعم" → Pass مباشرة
+  // إذا الجواب الأصلي "لا" → يسأل عن الإيماءات
+  response_to_commands: {
+    title: "متابعة: الاستجابة للتعليمات",
+    question: "هل يستطيع طفلك اتباع أوامر تتضمن إيماءات أو إشارات بدلاً من الكلام فقط؟ (مثال: هل يستجيب لحركة يدك التي تشير إليه بالجلوس؟ أو هل يأخذ شيئاً عندما تشير إليه؟)",
+    type: "radio",
+    name: "response_to_commands_followup",
+    onlyIfFail: true,   // only show this step if initial answer was لا (1)
+    options: [
+      { label: "نعم", value: "yes" },
+      { label: "لا", value: "no" }
+    ],
+    scoring: { yes: "pass", no: "fail" }
+  },
+
 };
 
 function loadFollowupPage() {
@@ -926,12 +1127,16 @@ function loadFollowupPage() {
   followupCollectedAnswers = {};
   followupBtnState = {};
   currentFollowupIndex = 0;
+  
+  // الاستثناءات — دائمًا تظهر في الفولو أب
+followupSteps.push("response_to_name");
+followupSteps.push("play_skills");
 
   if (failed.includes("eye_contact")) followupSteps.push("eye_contact");
-  if (failed.includes("response_to_name")) followupSteps.push("response_to_name");
   if (failed.includes("pointing_with_finger")) followupSteps.push("pointing_with_finger");
   if (failed.includes("imitation")) followupSteps.push("imitation");
   if (failed.includes("discrimination")) followupSteps.push("discrimination");
+  if (failed.includes("response_to_commands")) followupSteps.push("response_to_commands");
 
   if (followupSteps.length === 0) {
     document.getElementById("followupContainer").innerHTML = `
@@ -955,13 +1160,43 @@ function renderFollowupStep() {
   const step = FOLLOWUP_STEPS_CONFIG[skill];
   const assessment = getAssessment();
 
-  if (skill === "response_to_name") {
-    const initialAnswer = assessment.initialAnswers.response_to_name;
+  // تغيير سؤال الاستجابة للاسم حسب الجواب الأساسي
+if (skill === "response_to_name") {
+  const initialAnswer = assessment.initialAnswers.response_to_name;
 
-    if (initialAnswer === 1) {
-      step.question = "هل طفلك يستجيب لاسمه في مواقف أخرى حتى لو لم يكن الأمر ثابتًا؟ (مثال: قد يستجيب في الحديقة أو عند الحماس لكنه لا يستجيب أثناء مشاهدة التلفاز أو عندما يكون مركزًا على نشاط).";
-    } else {
-      step.question = "هل استجابة طفلك مرتبطة فعلاً بمعرفته لاسمه، أم أنها تحدث بسبب نبرة الصوت أو التلميحات؟ (مثال: إذا قلت اسمه بصوت عادي من بعيد هل ينظر إليك؟)";
+  if (initialAnswer === 1) {
+    step.question = "هل يستجيب طفلك لاسمه أحياناً في مواقف أخرى، حتى لو لم يكن ذلك ثابتاً؟ (مثال: يستجيب في الحديقة أو عند حماسه، لكن لا يستجيب أثناء مشاهدة التلفاز أو عند تركيزه على نشاط ما)";
+  } else {
+    step.question = "هل استجابة طفلك مرتبطة بتعرّفه على اسمه فعلاً، أم أنها بسبب نبرة الصوت أو الإيماءات الإضافية فقط؟ (مثال: إذا ناديته باسمه بصوت طبيعي من الجانب الآخر للغرفة، هل ينظر إليك أو يتوقف عما يفعله؟)";
+  }
+}
+
+// تغيير سؤال مهارات اللعب حسب الجواب الأساسي
+if (skill === "play_skills") {
+  const initialAnswer = assessment.initialAnswers.play_skills;
+
+  if (initialAnswer === 1) {
+    step.question = "هل يغيّر طفلك سيناريوهات اللعب التخيلي أو يستخدم الأشياء بطرق مختلفة وإبداعية؟ (مثال: هل يتخيل أن الهاتف موزة، ثم في لعبة أخرى يستخدم الموزة كفرشاة أسنان؟)";
+  } else {
+    step.question = "عندما يلعب طفلك بالألعاب (مثل السيارات أو المكعبات)، هل يظهر باستمرار سلوكيات متكررة مثل ترتيب الألعاب أو التركيز على جزء واحد لفترة طويلة؟";
+  }
+}
+
+
+  // Handle onlyIfFail: skip this step entirely if initial was pass
+  if (step.onlyIfFail) {
+    const skillKey = skill;
+    const initialAnswer = assessment.initialAnswers?.[skillKey];
+    if (Number(initialAnswer) !== 1) {
+      // Initial was pass → auto-pass this followup and move on
+      followupCollectedAnswers[step.name] = "auto_pass";
+      if (currentFollowupIndex < followupSteps.length - 1) {
+        currentFollowupIndex++;
+        renderFollowupStep();
+      } else {
+        finalizeFollowup();
+      }
+      return;
     }
   }
 
@@ -1060,7 +1295,7 @@ function renderFollowupStep() {
     <div id="questionnaireError" style="color:red; text-align:center; margin-top:12px; min-height:20px; font-size:14px;"></div>
 
     <div class="questionnaire-nav">
-      ${!isFirst ? `<button type="button" class="questionnaire-next-btn" onclick="goPrevFollowup()">السابق</button>` : ""}
+      ${!isFirst ? `<button type="button" class="questionnaire-next-btn followup-prev-btn" onclick="goPrevFollowup()">السابق</button>` : ""}
       <button type="button" class="questionnaire-next-btn" onclick="goNextFollowup()">${isLast ? "إرسال" : "التالي"}</button>
     </div>
   `;
@@ -1117,6 +1352,7 @@ function goNextFollowup() {
 
   const skill = followupSteps[currentFollowupIndex];
   const step = FOLLOWUP_STEPS_CONFIG[skill];
+  const assessment = getAssessment();
 
   if (skill === "eye_contact") {
     const count = followupBtnState[step.name] ? followupBtnState[step.name].size : 0;
@@ -1170,6 +1406,43 @@ function goNextFollowup() {
     const count = followupBtnState[step.name] ? followupBtnState[step.name].size : 0;
     followupCollectedAnswers.discrimination = count >= 2 ? 0 : 1;
   }
+
+    else if (skill === "play_skills") {
+    const val = followupBtnState[step.name];
+    if (!val) {
+      if (error) error.textContent = "يرجى الإجابة على سؤال متابعة مهارات اللعب.";
+      return;
+    }
+
+    const initialAnswer = Number(getAssessment()?.initialAnswers?.play_skills);
+
+    if (initialAnswer === 1) {
+      // كان الجواب الأصلي "لا"
+      // نعم = Pass ، لا = Fail
+      followupCollectedAnswers.play_skills = (val === "yes") ? 0 : 1;
+    } else {
+      // كان الجواب الأصلي "نعم"
+      // نعم = Fail ، لا = Pass
+      followupCollectedAnswers.play_skills = (val === "yes") ? 1 : 0;
+    }
+  }
+
+
+  // ── الاستجابة للتعليمات ── yes=pass, no=fail
+  else if (skill === "response_to_commands") {
+    if (followupCollectedAnswers.response_to_commands_followup === "auto_pass") {
+      followupCollectedAnswers.response_to_commands = 0;
+    } else {
+      const val = followupBtnState[step.name];
+      if (!val) {
+        if (error) error.textContent = "يرجى الإجابة على السؤال.";
+        return;
+      }
+      followupCollectedAnswers.response_to_commands = val === "yes" ? 0 : 1;
+    }
+  }
+
+ 
 
   if (currentFollowupIndex < followupSteps.length - 1) {
     currentFollowupIndex++;
@@ -1240,39 +1513,7 @@ async function finalizeFollowup() {
   window.location.href = "result.html";
 }
 
-function handleResultMainAction() {
-
-  const assessment = getAssessment();
-
-  if (!assessment) {
-    window.location.href = "questionnaire.html";
-    return;
-  }
-
-  let risk = assessment.initialRisk;
-
-  if (assessment.followupComplete) {
-    risk = assessment.finalRisk;
-  }
-
-  if (risk === "low") {
-
-    window.location.href = "home-login.html";
-
-  } else {
-
-    if (assessment.followupComplete) {
-
-      window.location.href = "games.html";
-
-    } else {
-
-      window.location.href = "followup.html";
-
-    }
-
-  }
-}
+// (duplicate removed — handled above)
 
 /* =========================
    GROWTH DATA
@@ -1394,6 +1635,8 @@ const SKILL_TITLES = {
 };
 
 const GAMES_AND_TIPS_DATA = [
+
+  // ── الاستجابة للاسم — لعبة فقط ──
   {
     id: "game_response_to_name",
     skillKey: "response_to_name",
@@ -1405,17 +1648,8 @@ const GAMES_AND_TIPS_DATA = [
     playable: true,
     targetPage: "response-game.html"
   },
-  {
-    id: "tip_response_to_name",
-    skillKey: "response_to_name",
-    title: "الاستجابة للاسم",
-    cardType: "tip",
-    cardIcon: "../pictures/skill-tip.png",
-    detailIcon: SKILL_ICONS.response_to_name,
-    detailText: "كرري اسم الطفل في مواقف يومية ممتعة، وامنحيه تعزيزًا فوريًا عندما يلتفت أو يستجيب. احرصي على أن يكون الصوت واضحًا وأن تقللي المشتتات أثناء التدريب.",
-    playable: false
-  },
 
+  // ── التواصل البصري — لعبة فقط ──
   {
     id: "game_eye_contact",
     skillKey: "eye_contact",
@@ -1427,27 +1661,8 @@ const GAMES_AND_TIPS_DATA = [
     playable: true,
     targetPage: "eye-contact-game.html"
   },
-  {
-    id: "tip_eye_contact",
-    skillKey: "eye_contact",
-    title: "التواصل البصري",
-    cardType: "tip",
-    cardIcon: "../pictures/skill-tip.png",
-    detailIcon: SKILL_ICONS.eye_contact,
-    detailText: "قربي وجهك من مستوى نظر الطفل أثناء اللعب، وامنحيه وقتًا كافيًا للنظر إليك، مع استخدام ألعاب يحبها أو أصوات مشجعة لزيادة فرص التواصل البصري.",
-    playable: false
-  },
 
-  {
-    id: "game_social_smile",
-    skillKey: "social_smile",
-    title: "الابتسامة الاجتماعية",
-    cardType: "game",
-    cardIcon: "../pictures/skill-game.png",
-    detailIcon: SKILL_ICONS.social_smile,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لدعم مهارة الابتسامة الاجتماعية من خلال مواقف مرحة وتعزيزات مناسبة.",
-    playable: false
-  },
+  // ── الابتسامة الاجتماعية — نصيحة فقط ──
   {
     id: "tip_social_smile",
     skillKey: "social_smile",
@@ -1459,16 +1674,7 @@ const GAMES_AND_TIPS_DATA = [
     playable: false
   },
 
-  {
-    id: "game_imitation",
-    skillKey: "imitation",
-    title: "التقليد",
-    cardType: "game",
-    cardIcon: "../pictures/skill-game.png",
-    detailIcon: SKILL_ICONS.imitation,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لدعم مهارة التقليد من خلال حركات بسيطة وأنشطة ممتعة وتدريجية.",
-    playable: false
-  },
+  // ── التقليد — نصيحة فقط ──
   {
     id: "tip_imitation",
     skillKey: "imitation",
@@ -1480,6 +1686,7 @@ const GAMES_AND_TIPS_DATA = [
     playable: false
   },
 
+  // ── التمييز — لعبة فقط ──
   {
     id: "game_discrimination",
     skillKey: "discrimination",
@@ -1487,30 +1694,11 @@ const GAMES_AND_TIPS_DATA = [
     cardType: "game",
     cardIcon: "../pictures/skill-game.png",
     detailIcon: SKILL_ICONS.discrimination,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لدعم مهارة التمييز بين الأشياء والأشكال والمفاهيم اليومية بطريقة تفاعلية.",
-    playable: false
-  },
-  {
-    id: "tip_discrimination",
-    skillKey: "discrimination",
-    title: "التمييز",
-    cardType: "tip",
-    cardIcon: "../pictures/skill-tip.png",
-    detailIcon: SKILL_ICONS.discrimination,
-    detailText: "استخدمي بطاقات أو أدوات حقيقية من بيئة الطفل، وابدئي بالتمييز بين عنصرين فقط، ثم زيدي الصعوبة تدريجيًا مع التكرار والتعزيز.",
+    detailText: "لعبة التمييز تساعد الطفل على التعرف على الأشكال والأشياء والمفاهيم اليومية من خلال أنشطة تفاعلية بسيطة وممتعة تدعم التفكير والتركيز.",
     playable: false
   },
 
-  {
-    id: "game_pointing_with_finger",
-    skillKey: "pointing_with_finger",
-    title: "الإشارة بالإصبع",
-    cardType: "game",
-    cardIcon: "../pictures/skill-game.png",
-    detailIcon: SKILL_ICONS.pointing_with_finger,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لدعم مهارة الإشارة بالإصبع وطلب الأشياء أو لفت الانتباه بطريقة تفاعلية.",
-    playable: false
-  },
+  // ── الإشارة بالإصبع — نصيحة فقط ──
   {
     id: "tip_pointing_with_finger",
     skillKey: "pointing_with_finger",
@@ -1522,6 +1710,7 @@ const GAMES_AND_TIPS_DATA = [
     playable: false
   },
 
+  // ── تعابير الوجه — لعبة فقط ──
   {
     id: "game_facial_expressions",
     skillKey: "facial_expressions",
@@ -1529,30 +1718,11 @@ const GAMES_AND_TIPS_DATA = [
     cardType: "game",
     cardIcon: "../pictures/skill-game.png",
     detailIcon: SKILL_ICONS.facial_expressions,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لمساعدة الطفل على فهم تعابير الوجه وربطها بالمواقف المختلفة.",
-    playable: false
-  },
-  {
-    id: "tip_facial_expressions",
-    skillKey: "facial_expressions",
-    title: "تعابير الوجه",
-    cardType: "tip",
-    cardIcon: "../pictures/skill-tip.png",
-    detailIcon: SKILL_ICONS.facial_expressions,
-    detailText: "استخدمي المرآة والصور التعبيرية وتمثيل المشاعر المختلفة مثل الفرح والحزن والتعجب، مع تسمية كل تعبير بوضوح أثناء اللعب أو القراءة.",
+    detailText: "لعبة تعابير الوجه تساعد الطفل على فهم المشاعر المختلفة وربطها بالمواقف من خلال بطاقات تعبيرية وأنشطة ممتعة ومشوقة.",
     playable: false
   },
 
-  {
-    id: "game_joint_attention",
-    skillKey: "joint_attention",
-    title: "الانتباه المشترك",
-    cardType: "game",
-    cardIcon: "../pictures/skill-game.png",
-    detailIcon: SKILL_ICONS.joint_attention,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لدعم مهارة الانتباه المشترك ومشاركة الطفل الاهتمام مع الآخرين.",
-    playable: false
-  },
+  // ── الانتباه المشترك — نصيحة فقط ──
   {
     id: "tip_joint_attention",
     skillKey: "joint_attention",
@@ -1564,6 +1734,7 @@ const GAMES_AND_TIPS_DATA = [
     playable: false
   },
 
+  // ── مهارات اللعب — لعبة فقط ──
   {
     id: "game_play_skills",
     skillKey: "play_skills",
@@ -1571,30 +1742,11 @@ const GAMES_AND_TIPS_DATA = [
     cardType: "game",
     cardIcon: "../pictures/skill-game.png",
     detailIcon: SKILL_ICONS.play_skills,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لتنمية مهارات اللعب الوظيفي والتخيلي من خلال مواقف مرحة وتدريجية.",
-    playable: false
-  },
-  {
-    id: "tip_play_skills",
-    skillKey: "play_skills",
-    title: "مهارات اللعب",
-    cardType: "tip",
-    cardIcon: "../pictures/skill-tip.png",
-    detailIcon: SKILL_ICONS.play_skills,
-    detailText: "ابدئي بألعاب بسيطة وواضحة الهدف، ثم انتقلي تدريجيًا إلى اللعب التخيلي باستخدام الدمى والأدوات اليومية مع مشاركة الكبار.",
+    detailText: "لعبة مهارات اللعب تنمي قدرة الطفل على اللعب الوظيفي والتخيلي من خلال مواقف مرحة وتدريجية تشجع على التفاعل والإبداع.",
     playable: false
   },
 
-  {
-    id: "game_response_to_commands",
-    skillKey: "response_to_commands",
-    title: "الاستجابة للتعليمات",
-    cardType: "game",
-    cardIcon: "../pictures/skill-game.png",
-    detailIcon: SKILL_ICONS.response_to_commands,
-    detailText: "هذه اللعبة قيد التطوير حاليًا، وسيتم العمل عليها مستقبلًا لدعم مهارة اتباع التعليمات اليومية بطريقة ممتعة وتفاعلية.",
-    playable: false
-  },
+  // ── الاستجابة للتعليمات — نصيحة فقط ──
   {
     id: "tip_response_to_commands",
     skillKey: "response_to_commands",
@@ -1630,10 +1782,9 @@ function renderGrowthItems(filter) {
   const container = document.getElementById("growthItemsGrid");
   if (!container) return;
 
+  // Get failed skills from assessment
   const assessment = getAssessment();
-  const weakSkills = assessment?.followupComplete
-    ? Object.keys(assessment.currentAnswers || {}).filter(key => Number(assessment.currentAnswers[key]) === 1)
-    : Object.keys(assessment?.initialAnswers || {}).filter(key => Number(assessment.initialAnswers[key]) === 1);
+  const failedSkills = assessment?.failedSkills || [];
 
   let items = [];
 
@@ -1644,7 +1795,35 @@ function renderGrowthItems(filter) {
   } else if (filter === "tips") {
     items = GAMES_AND_TIPS_DATA.filter(item => item.cardType === "tip");
   } else if (filter === "growth") {
-    items = GAMES_AND_TIPS_DATA.filter(item => item.cardType === "game" && weakSkills.includes(item.skillKey));
+    // Show only items related to failed skills
+    items = GAMES_AND_TIPS_DATA.filter(item => failedSkills.includes(item.skillKey));
+  }
+
+  // Build info message for نقاط النمو tab
+  const infoBox = document.getElementById("growthInfoBox");
+  if (infoBox) {
+    if (filter === "growth") {
+      if (failedSkills.length > 0) {
+        const skillNames = failedSkills.map(s => skillLabelsArabic[s] || s).join("، ");
+        infoBox.innerHTML = `
+          <div class="growth-info-msg">
+            <span class="growth-info-icon">💡</span>
+            <div>
+              <strong>مهارات طفلك التي تحتاج تطوير:</strong> ${skillNames}<br>
+              <span>الألعاب والنصائح أدناه مصممة خصيصاً لمساعدة طفلك على تطوير هذه المهارات</span>
+            </div>
+          </div>`;
+      } else {
+        infoBox.innerHTML = `
+          <div class="growth-info-msg" style="background:#edf7ed;border-color:#27AE60;color:#1a6b30;">
+            <span class="growth-info-icon">✅</span>
+            <div>طفلك أظهر أداءً جيداً في جميع المهارات. يمكنك تصفح الألعاب والنصائح لتعزيز نموه</div>
+          </div>`;
+      }
+      infoBox.style.display = "block";
+    } else {
+      infoBox.style.display = "none";
+    }
   }
 
   if (!items.length) {
@@ -1656,12 +1835,20 @@ function renderGrowthItems(filter) {
     return;
   }
 
-  container.innerHTML = items.map(item => `
+  container.innerHTML = items.map(item => {
+    const isGame = item.cardType === 'game';
+    const badgeColor = isGame ? '#3c5274' : '#7a93b5';
+    const badgeLabel = isGame ? 'لعبة' : 'نصيحة';
+    const skillIcon = SKILL_ICONS[item.skillKey] || '';
+    return `
     <button class="growth-item-card" onclick="openGrowthDetail('${item.id}')">
-      <img src="${item.cardIcon}" alt="${item.title}" class="growth-item-image" />
+      <div class="growth-card-icon-wrap" style="background:${isGame ? '#edf1f7' : '#f5f0f7'};">
+        <img src="${skillIcon}" alt="${item.title}" class="growth-skill-icon" onerror="this.style.display='none'" />
+      </div>
+      <div class="growth-card-badge" style="background:${badgeColor};">${badgeLabel}</div>
       <div class="growth-item-title">${item.title}</div>
-    </button>
-  `).join("");
+    </button>`;
+  }).join("");
 }
 
 function openGrowthDetail(itemId) {
@@ -2005,3 +2192,140 @@ async function saveSettingsData() {
   if (saveBtn) saveBtn.style.display = "none";
 }
 
+function goDashboard() {
+  window.location.href = "dashboard.html";
+}
+
+function loadDashboardPage() {
+  const assessment = getAssessment();
+  const history = JSON.parse(localStorage.getItem("maddadHistory") || "[]");
+
+  if (!assessment) {
+    window.location.href = "questionnaire.html";
+    return;
+  }
+
+  // تحديد الحالة والسكور
+  const risk = assessment.followupComplete
+    ? assessment.finalRisk
+    : assessment.initialRisk;
+
+  const score = assessment.followupComplete
+    ? assessment.finalScore
+    : assessment.initialScore;
+
+  const failed = assessment.failedSkills || [];
+
+  // عناصر الصفحة
+  const skillsCountEl = document.getElementById("skillsCount");
+  const lastScoreEl = document.getElementById("lastScore");
+  const historyCountEl = document.getElementById("historyCount");
+
+  const img = document.getElementById("riskImage");
+  const title = document.getElementById("riskTitle");
+  const desc = document.getElementById("riskDesc");
+
+  const skillsList = document.getElementById("skillsList");
+  const historyList = document.getElementById("historyList");
+  const trendText = document.getElementById("trendText");
+  const chartCanvas = document.getElementById("progressChart");
+
+  // الإحصائيات
+  if (skillsCountEl) skillsCountEl.textContent = failed.length;
+  if (lastScoreEl) lastScoreEl.textContent = score ?? 0;
+  if (historyCountEl) historyCountEl.textContent = history.length;
+
+  // الحالة
+  if (img && title && desc) {
+    if (risk === "low") {
+      img.src = "../pictures/result-low.png";
+      title.textContent = "احتمالية منخفضة";
+      desc.textContent = "نتيجة مطمئنة مع الاستمرار في المتابعة.";
+    } else if (risk === "medium") {
+      img.src = "../pictures/result-medium.png";
+      title.textContent = "احتمالية متوسطة";
+      desc.textContent = "توجد بعض المؤشرات وتحتاج متابعة.";
+    } else {
+      img.src = "../pictures/result-high.png";
+      title.textContent = "احتمالية مرتفعة";
+      desc.textContent = "يوصى بالمتابعة والتقييم المتخصص.";
+    }
+  }
+
+  // المهارات
+  if (skillsList) {
+    if (failed.length === 0) {
+      skillsList.innerHTML = `<span>لا توجد مهارات تحتاج متابعة</span>`;
+    } else {
+      skillsList.innerHTML = failed
+        .map(s => `<span>${skillLabelsArabic[s] || s}</span>`)
+        .join("");
+    }
+  }
+
+  // السجل (آخر 5)
+  if (historyList) {
+    if (history.length === 0) {
+      historyList.innerHTML = `<div class="dashboard-empty">لا يوجد سجل تقييمات بعد</div>`;
+    } else {
+      historyList.innerHTML = `
+        <div class="dashboard-history-row dashboard-history-head">
+          <span>التاريخ</span>
+          <span>النتيجة</span>
+          <span>السكور</span>
+        </div>
+
+        ${history.slice(-5).reverse().map(h => `
+          <div class="dashboard-history-row">
+            <span>${h.date || "-"}</span>
+            <span>${h.risk || "-"}</span>
+            <span>${h.score ?? "-"}</span>
+          </div>
+        `).join("")}
+      `;
+    }
+  }
+
+  // الرسم البياني
+  const labels = history.map(h => h.date);
+  const data = history.map(h => h.score);
+
+  if (chartCanvas && typeof Chart !== "undefined" && data.length > 0) {
+    new Chart(chartCanvas, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "Score",
+          data,
+          borderColor: "#3c5274",
+          backgroundColor: "rgba(60,82,116,0.1)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+
+  // الاتجاه
+  if (trendText && data.length >= 2) {
+    const diff = data[data.length - 1] - data[data.length - 2];
+
+    if (diff < 0) trendText.textContent = "تحسن 👍";
+    else if (diff > 0) trendText.textContent = "تراجع ⚠️";
+    else trendText.textContent = "ثابت";
+  } else if (trendText) {
+    trendText.textContent = "";
+  }
+}
