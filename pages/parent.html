@@ -95,6 +95,16 @@
         </div>
 
         <div class="parent-form-group">
+          <label>أنت</label>
+          <div class="selection-group" id="parentRoleSelection">
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupParentRole', 'أب', 'signupParentRoleError')">أب</button>
+            <button type="button" class="selection-btn" onclick="selectOption(this, 'signupParentRole', 'أم', 'signupParentRoleError')">أم</button>
+          </div>
+          <input type="hidden" id="signupParentRole" />
+          <span class="field-error" id="signupParentRoleError"></span>
+        </div>
+
+        <div class="parent-form-group">
           <label for="signupEmail">البريد الإلكتروني</label>
           <input
             type="email"
