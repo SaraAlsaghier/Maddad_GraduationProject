@@ -1035,6 +1035,28 @@ response_to_name: {
   ]
 },
 
+  joint_attention: {
+  title: "متابعة: الانتباه المشترك",
+  question: "إذا أشرتِ لطفلك إلى لعبة أو شيء مثير للاهتمام، هل يحاول لفت انتباهك إليه بالإشارة أو بالنظر إليه أو بإظهاره لك؟",
+  type: "radio",
+  name: "joint_attention_followup",
+  options: [
+    { label: "نعم", value: "yes" },
+    { label: "لا", value: "no" }
+  ]
+},
+
+facial_expressions: {
+  title: "متابعة: تعابير الوجه",
+  question: "عندما يكون أحد من حول طفلك منزعجًا أو يبكي، هل ينظر إليه طفلك أو يحاول مواساته؟",
+  type: "radio",
+  name: "facial_expressions_followup",
+  options: [
+    { label: "نعم", value: "yes" },
+    { label: "لا", value: "no" }
+  ]
+},
+  
   pointing_with_finger: {
     title: "متابعة: الإشارة بالإصبع",
     question: "اختاري ما ينطبق على طفلك:",
@@ -1137,7 +1159,9 @@ followupSteps.push("play_skills");
   if (failed.includes("imitation")) followupSteps.push("imitation");
   if (failed.includes("discrimination")) followupSteps.push("discrimination");
   if (failed.includes("response_to_commands")) followupSteps.push("response_to_commands");
-
+  if (failed.includes("joint_attention")) followupSteps.push("joint_attention");
+if (failed.includes("facial_expressions")) followupSteps.push("facial_expressions");
+  
   if (followupSteps.length === 0) {
     document.getElementById("followupContainer").innerHTML = `
       <div class="question-progress">لا توجد أسئلة متابعة حالياً</div>
@@ -1379,6 +1403,24 @@ function goNextFollowup() {
     }
     followupCollectedAnswers.response_to_name = val === "yes" ? 0 : 1;
   }
+
+    else if (skill === "joint_attention") {
+  const val = followupBtnState[step.name];
+  if (!val) {
+    if (error) error.textContent = "يرجى الإجابة على سؤال متابعة الانتباه المشترك.";
+    return;
+  }
+  followupCollectedAnswers.joint_attention = val === "yes" ? 0 : 1;
+}
+
+else if (skill === "facial_expressions") {
+  const val = followupBtnState[step.name];
+  if (!val) {
+    if (error) error.textContent = "يرجى الإجابة على سؤال متابعة تعابير الوجه.";
+    return;
+  }
+  followupCollectedAnswers.facial_expressions = val === "yes" ? 0 : 1;
+}
 
   else if (skill === "pointing_with_finger") {
     const count = followupBtnState[step.name] ? followupBtnState[step.name].size : 0;
