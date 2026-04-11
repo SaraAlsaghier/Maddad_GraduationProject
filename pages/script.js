@@ -978,17 +978,12 @@ function handleResultMainAction() {
     return;
   }
 
-  if (shownRisk === "low") {
-    window.location.href = "report.html";
-    return;
-  }
+ 
 
   window.location.href = "games.html";
 }
 
-function goToDetailedReport() {
-  window.location.href = "report.html";
-}
+
 
 function goBackHome() {
   window.location.href = "home-login.html";
