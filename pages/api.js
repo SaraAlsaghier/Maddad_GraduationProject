@@ -18,7 +18,7 @@
 const MADDAD_API_BASE =
   window.MADDAD_API_BASE ||
   localStorage.getItem("MADDAD_API_BASE") ||
-  "http://localhost:8000";
+  "https://maddadgraduationproject-production.up.railway.app";
 
 /* -----------------------------------------------------------------------
    Token helpers (stored in sessionStorage so it is cleared on tab close)
