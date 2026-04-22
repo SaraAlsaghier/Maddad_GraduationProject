@@ -1921,7 +1921,10 @@ function loadGrowthDetailPage() {
     actionBtn.onclick = function () {
       window.location.href = item.targetPage;
     };
-  }  
+  }  else {
+  // This hides the button completely when it's not playable
+  actionBtn.style.display = "none";
+}
 }
 
 
