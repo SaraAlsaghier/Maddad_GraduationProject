@@ -1076,12 +1076,12 @@ facial_expressions: {
     type: "checkbox",
     name: "imitation_context",
     options: [
-      { label: "هل يخرج لسانه؟", value: "tongue" },
-      { label: "هل يصدر أصواتاً مضحكة؟", value: "sounds" },
-      { label: 'هل يلوح قاصداً "وداعاً"؟ (أو يشير لـ "وداعاً"؟)', value: "wave" },
-      { label: "هل يصفق بيده؟", value: "clap" },
-      { label: 'هل يضع إصبعه على شفتيه كإشارة لـ "السكوت"/"الصمت"؟', value: "shush" },
-      { label: "هل يرسل قبلة في الهواء؟", value: "kiss" }
+      { label: " يخرج لسانه", value: "tongue" },
+      { label: " يصدر أصواتاً مضحكة", value: "sounds" },
+      { label: ' يلوح قاصداً "وداعاً" (أو يشير لـ "وداعاً")', value: "wave" },
+      { label: " يصفق بيده", value: "clap" },
+      { label: ' يضع إصبعه على شفتيه كإشارة لـ "السكوت"/"الصمت"', value: "shush" },
+      { label: " يرسل قبلة في الهواء", value: "kiss" }
     ]
   },
 
