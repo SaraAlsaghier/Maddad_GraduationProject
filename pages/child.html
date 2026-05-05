@@ -3,14 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مدد | لعبة التواصل البصري</title>
+  <title>مدد | أسئلة المتابعة</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body style="background:#F3F8FF; min-height:100vh; display:flex; align-items:center; justify-content:center;">
-  <div style="background:white; padding:40px; border-radius:24px; box-shadow:0 18px 40px rgba(0,0,0,0.08); text-align:center; max-width:700px;">
-    <h1>لعبة التواصل البصري</h1>
-    <p>سيتم لاحقًا ربط هذه الصفحة بلعبة Unity الخاصة بالتواصل البصري.</p>
-    <button onclick="window.location.href='games.html'" style="border:none; background:#6F58B4; color:white; border-radius:999px; padding:14px 24px; font-size:18px;">العودة</button>
+<body class="followup-page-body" onload="loadFollowupPage()">
+
+  <div class="followup-shell">
+
+    <!-- Top Bar -->
+    <header class="followup-topbar">
+      <img src="../pictures/logo.png" alt="شعار مدد" class="followup-top-logo" />
+
+      <div class="followup-top-actions">
+        <button class="followup-top-icon-btn logout-icon-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button class="followup-top-icon-btn back-icon-btn" onclick="window.location.href='result.html'" aria-label="العودة">←</button>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="followup-main-wrap">
+      <section class="followup-main-card">
+
+        <h1 class="followup-main-title">أسئلة المتابعة</h1>
+
+        <p class="followup-main-subtitle">
+          نحتاج بعض التفاصيل الإضافية لتحسين دقة النتيجة والوصول إلى تقييم أكثر دقة ووضوحًا.
+        </p>
+
+        <div id="followupContainer"></div>
+
+      </section>
+    </main>
+
   </div>
+
+  <script src="api.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
