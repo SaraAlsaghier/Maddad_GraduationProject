@@ -3,37 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مدد | صفحة الطفل</title>
+  <title>مدد | الأداء</title>
+
   <link rel="stylesheet" href="style.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="child-games-body" onload="loadChildGamesPage()">
 
-  <div class="child-games-shell">
+<body class="dashboard-body" onload="loadDashboardPage()">
+  <div class="dashboard-shell">
 
-    <!-- Top Bar -->
-    <header class="child-games-topbar">
-      <button class="child-games-logout-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
-      <img src="../pictures/logo.png" class="child-games-top-logo" alt="شعار مدد" />
+    <header class="dashboard-topbar">
+      <img src="../pictures/logo.png" class="dashboard-logo" alt="شعار مدد" />
+
+      <div class="dashboard-actions">
+        <button onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
+        <button onclick="goBackHome()" aria-label="العودة">←</button>
+      </div>
     </header>
 
-    <!-- Main -->
-    <main class="child-games-main-wrap">
-      <section class="child-games-main-card">
+    <main class="dashboard-main">
 
-        <h1 class="child-games-title">الألعاب</h1>
-
-        <div class="child-games-tabs">
-          <button class="child-games-tab active" onclick="setChildGamesFilter('all', this)">الألعاب</button>
-          <button class="child-games-tab" onclick="setChildGamesFilter('growth', this)">نقاط النمو</button>
+      <section class="dashboard-card main-card">
+        <img id="riskImage" class="risk-image" alt="حالة التقييم الحالية" />
+        <div class="dashboard-hero-text">
+          <h2 id="riskTitle">-</h2>
+          <p id="riskDesc">-</p>
         </div>
-
-        <div class="child-games-scroll-box">
-          <div id="childGamesGrid" class="child-games-grid"></div>
-        </div>
-
       </section>
-    </main>
 
+      <section class="dashboard-stats">
+        <div class="stat-box">
+          <span>عدد المهارات</span>
+          <h3 id="skillsCount">0</h3>
+        </div>
+
+        <div class="stat-box">
+          <span>آخر سكور</span>
+          <h3 id="lastScore">0</h3>
+        </div>
+
+        <div class="stat-box">
+          <span>عدد التقييمات</span>
+          <h3 id="historyCount">0</h3>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-chart-card">
+        <h3>تطور الحالة</h3>
+        <div class="dashboard-chart-wrap">
+          <canvas id="progressChart"></canvas>
+        </div>
+        <p id="trendText" class="trend-text"></p>
+      </section>
+
+      <section class="dashboard-card dashboard-history-card">
+        <h3>سجل التقييمات</h3>
+        <div id="historyList" class="dashboard-history-list"></div>
+      </section>
+
+      <section class="dashboard-card dashboard-skills-card">
+        <h3>المهارات التي تحتاج متابعة</h3>
+        <div id="skillsList" class="skills-list"></div>
+      </section>
+
+    </main>
   </div>
 
   <script src="api.js"></script>
