@@ -238,3 +238,48 @@ function _cacheAccountFromProfile(profile) {
 function _localAccount() {
   return JSON.parse(localStorage.getItem("maddadAccount")) || {};
 }
+
+/* -----------------------------------------------------------------------
+   Permissions API
+----------------------------------------------------------------------- */
+
+async function apiGetPermissions() {
+  try {
+    const result = await apiFetch("/api/permissions/");
+    const perms = {};
+    result.forEach(p => { perms[p.game_id] = p.allowed; });
+    return perms;
+  } catch (_) {
+    const account = JSON.parse(localStorage.getItem("maddadAccount") || "{}");
+    const key = "maddadGamePermissions_" + (account.email || "default");
+    return JSON.parse(localStorage.getItem(key) || "{}");
+  }
+}
+
+async function apiRequestPermission(gameId, gameTitle) {
+  try {
+    return await apiFetch("/api/permissions/request", {
+      method: "POST",
+      body: JSON.stringify({ game_id: gameId, game_title: gameTitle })
+    });
+  } catch (_) { return null; }
+}
+
+async function apiUpdatePermission(gameId, allowed) {
+  try {
+    return await apiFetch("/api/permissions/update", {
+      method: "PUT",
+      body: JSON.stringify({ game_id: gameId, allowed })
+    });
+  } catch (_) { return null; }
+}
+
+async function apiGetPermissionRequests() {
+  try {
+    return await apiFetch("/api/permissions/requests");
+  } catch (_) {
+    const account = JSON.parse(localStorage.getItem("maddadAccount") || "{}");
+    const key = "maddadPermissionRequests_" + (account.email || "default");
+    return JSON.parse(localStorage.getItem(key) || "[]");
+  }
+}
