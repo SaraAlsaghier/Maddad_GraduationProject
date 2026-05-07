@@ -44,7 +44,6 @@ def submit_questionnaire(
     db: Session = Depends(get_db),
 ):
     answers_dict = body.answers.model_dump()
-
     score = sum(answers_dict.values())
 
     try:
@@ -53,12 +52,11 @@ def submit_questionnaire(
     except FileNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Machine learning files not found. Please ensure the deployed model assets are available."
+            detail="Machine learning files not found. Please ensure the deployed model assets are available.",
         )
 
     failed_skills = [k for k, v in answers_dict.items() if v == 1]
-
-    followup_needed = ml_risk.lower() in ("medium", "high")
+    followup_needed = ml_risk in ("medium", "high")
 
     result = QuestionnaireResult(
         user_id=current_user.id,
@@ -75,20 +73,20 @@ def submit_questionnaire(
     db.commit()
     db.refresh(result)
 
-monitoring_log = ModelMonitoringLog(
-    user_id=current_user.id,
-    questionnaire_result_id=result.id,
-    age_group=body.age_group,
-    gender=body.gender,
-    input_answers=answers_dict,
-    prediction=ml_risk,
-    confidence=ml_confidence,
-    score=score,
-    failed_skills_count=len(failed_skills),
-)
+    monitoring_log = ModelMonitoringLog(
+        user_id=current_user.id,
+        questionnaire_result_id=result.id,
+        age_group=body.age_group,
+        gender=body.gender,
+        input_answers=answers_dict,
+        prediction=ml_risk,
+        confidence=ml_confidence,
+        score=score,
+        failed_skills_count=len(failed_skills),
+    )
 
-db.add(monitoring_log)
-db.commit()
+    db.add(monitoring_log)
+    db.commit()
 
     return QuestionnaireSubmitResponse(
         result_id=result.id,
@@ -161,10 +159,7 @@ def get_latest_assessment(
     if result.followup_answers:
         answers.update(result.followup_answers)
 
-    failed_skills = [
-        key for key, value in answers.items()
-        if int(value) == 1
-    ]
+    failed_skills = [key for key, value in answers.items() if int(value) == 1]
 
     return {
         "id": result.id,
@@ -210,19 +205,12 @@ def get_monitoring_summary(
     return {
         "total_predictions": len(logs),
         "risk_distribution": risk_distribution,
-        "average_confidence": round(
-            sum(log.confidence or 0 for log in logs) / len(logs), 3
-        ),
-        "average_score": round(
-            sum(log.score for log in logs) / len(logs), 2
-        ),
-        "average_failed_skills": round(
-            sum(log.failed_skills_count for log in logs) / len(logs), 2
-        ),
+        "average_confidence": round(sum(log.confidence or 0 for log in logs) / len(logs), 3),
+        "average_score": round(sum(log.score for log in logs) / len(logs), 2),
+        "average_failed_skills": round(sum(log.failed_skills_count for log in logs) / len(logs), 2),
     }
+
 
 @router.get("/test123")
 def test123():
     return {"msg": "it works"}
-
-
