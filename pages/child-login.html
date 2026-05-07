@@ -3,32 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مدد | صفحة الطفل</title>
+  <title>مدد | تفاصيل اللعبة</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="child-games-body" onload="loadChildGamesPage()">
+<body class="child-detail-body" onload="loadChildGrowthDetailPage()">
 
-  <div class="child-games-shell">
+  <div class="child-detail-shell">
 
     <!-- Top Bar -->
-    <header class="child-games-topbar">
-      <button class="child-games-logout-btn" onclick="logout()" aria-label="تسجيل الخروج">⎋</button>
-      <img src="../pictures/logo.png" class="child-games-top-logo" alt="شعار مدد" />
+    <header class="child-detail-topbar">
+      <button class="icon-box-btn" onclick="window.location.href='child.html'" aria-label="العودة">←</button>
+      <img src="../pictures/logo.png" class="child-detail-top-logo" alt="شعار مدد"
+  onclick="window.location.href='home-login.html'" style="cursor:pointer;" />
     </header>
 
     <!-- Main -->
-    <main class="child-games-main-wrap">
-      <section class="child-games-main-card">
+    <main class="child-detail-main-wrap">
+      <section class="child-detail-main-card">
 
-        <h1 class="child-games-title">الألعاب</h1>
+        <h1 class="child-detail-main-title">الألعاب المقترحة</h1>
 
-        <div class="child-games-tabs">
-          <button class="child-games-tab active" onclick="setChildGamesFilter('all', this)">الألعاب</button>
-          <button class="child-games-tab" onclick="setChildGamesFilter('growth', this)">نقاط النمو</button>
-        </div>
+        <div class="child-detail-content">
+          <img id="childDetailImage" class="child-detail-image" src="" alt="" />
 
-        <div class="child-games-scroll-box">
-          <div id="childGamesGrid" class="child-games-grid"></div>
+          <div class="child-detail-textbox">
+            <h2 id="childDetailSkill" class="child-detail-skill"></h2>
+            <p id="childDetailText" class="child-detail-text"></p>
+            <button id="childDetailBtn" class="child-detail-btn">ابدأ الآن</button>
+          </div>
         </div>
 
       </section>
