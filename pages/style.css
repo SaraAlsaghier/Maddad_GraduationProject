@@ -668,8 +668,7 @@ body{
 .return-home-body{
   min-height: 100vh;
   margin: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   background: #F3F8FF;
   direction: rtl;
 }
@@ -680,7 +679,7 @@ body{
     radial-gradient(circle at top right, rgba(141,162,201,0.18), transparent 18%),
     radial-gradient(circle at bottom left, rgba(216,168,184,0.14), transparent 16%),
     #F3F8FF;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 /* top bar */
@@ -3568,43 +3567,3 @@ html, body{
   }
 }
 
-/* FIX: enable scrolling on return home page */
-html,
-body {
-  min-height: 100%;
-  height: auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.return-home-body {
-  min-height: 100vh !important;
-  height: auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.return-home-shell {
-  min-height: 100vh !important;
-  height: auto !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-
-.return-home-main-layout {
-  min-height: calc(100vh - 82px) !important;
-  height: auto !important;
-  overflow: visible !important;
-  align-items: stretch;
-}
-
-.return-home-main-card {
-  min-height: auto !important;
-  height: auto !important;
-  overflow: visible !important;
-}
-
-.return-side-panel {
-  height: auto !important;
-  max-height: none !important;
-}
