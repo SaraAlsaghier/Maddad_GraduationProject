@@ -132,3 +132,44 @@ class QuestionnaireResult(Base):
     created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
     user = relationship("User", back_populates="questionnaire_results")
+
+
+# ---------------------------------------------------------------------------
+# model_monitoring_logs
+# ---------------------------------------------------------------------------
+
+class ModelMonitoringLog(Base):
+    __tablename__ = "model_monitoring_logs"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+
+    user_id = Column(
+        BigInteger,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    questionnaire_result_id = Column(
+        BigInteger,
+        ForeignKey("questionnaire_results.id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    age_group = Column(String(10), nullable=False)
+    gender = Column(String(10), nullable=False)
+
+    input_answers = Column(JSON, nullable=False)
+
+    prediction = Column(RiskLevelEnum, nullable=False)
+
+    confidence = Column(Float, nullable=True)
+
+    score = Column(SmallInteger, nullable=False)
+
+    failed_skills_count = Column(SmallInteger, nullable=False)
+
+    created_at = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now()
+    )
