@@ -176,6 +176,41 @@ def get_latest_assessment(
     }
 
 
+@router.get("/monitoring/summary")
+def get_monitoring_summary(
+    current_user: User = Depends(_get_current_user),
+    db: Session = Depends(get_db),
+):
+    logs = (
+        db.query(ModelMonitoringLog)
+        .filter(ModelMonitoringLog.user_id == current_user.id)
+        .all()
+    )
+
+    if not logs:
+        return {
+            "total_predictions": 0,
+            "risk_distribution": {},
+            "average_confidence": 0,
+            "average_score": 0,
+            "average_failed_skills": 0,
+        }
+
+    risk_distribution = {}
+
+    for log in logs:
+        risk = log.prediction
+        risk_distribution[risk] = risk_distribution.get(risk, 0) + 1
+
+    return {
+        "total_predictions": len(logs),
+        "risk_distribution": risk_distribution,
+        "average_confidence": round(sum(log.confidence or 0 for log in logs) / len(logs), 3),
+        "average_score": round(sum(log.score for log in logs) / len(logs), 2),
+        "average_failed_skills": round(sum(log.failed_skills_count for log in logs) / len(logs), 2),
+    }
+
+
 @router.get("/test123")
 def test123():
     return {"msg": "it works"}
