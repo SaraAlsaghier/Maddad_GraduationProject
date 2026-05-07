@@ -3567,3 +3567,44 @@ html, body{
     font-size: 22px;
   }
 }
+
+/* FIX: enable scrolling on return home page */
+html,
+body {
+  min-height: 100%;
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.return-home-body {
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.return-home-shell {
+  min-height: 100vh !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.return-home-main-layout {
+  min-height: calc(100vh - 82px) !important;
+  height: auto !important;
+  overflow: visible !important;
+  align-items: stretch;
+}
+
+.return-home-main-card {
+  min-height: auto !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.return-side-panel {
+  height: auto !important;
+  max-height: none !important;
+}
