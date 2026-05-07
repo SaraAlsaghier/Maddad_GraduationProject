@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import QuestionnaireResult, User, ModelMonitoringLog
+from app.models import QuestionnaireResult, User
 from app.ml.predictor import predict
 from app.routers.auth import _get_current_user
 from app.schemas import (
@@ -72,21 +72,6 @@ def submit_questionnaire(
     db.add(result)
     db.commit()
     db.refresh(result)
-
-    monitoring_log = ModelMonitoringLog(
-        user_id=current_user.id,
-        questionnaire_result_id=result.id,
-        age_group=body.age_group,
-        gender=body.gender,
-        input_answers=answers_dict,
-        prediction=ml_risk,
-        confidence=ml_confidence,
-        score=score,
-        failed_skills_count=len(failed_skills),
-    )
-
-    db.add(monitoring_log)
-    db.commit()
 
     return QuestionnaireSubmitResponse(
         result_id=result.id,
@@ -173,41 +158,6 @@ def get_latest_assessment(
         "ml_confidence": result.ml_confidence,
         "followup_complete": result.followup_answers is not None,
         "created_at": result.created_at,
-    }
-
-
-@router.get("/monitoring/summary")
-def get_monitoring_summary(
-    current_user: User = Depends(_get_current_user),
-    db: Session = Depends(get_db),
-):
-    logs = (
-        db.query(ModelMonitoringLog)
-        .filter(ModelMonitoringLog.user_id == current_user.id)
-        .all()
-    )
-
-    if not logs:
-        return {
-            "total_predictions": 0,
-            "risk_distribution": {},
-            "average_confidence": 0,
-            "average_score": 0,
-            "average_failed_skills": 0,
-        }
-
-    risk_distribution = {}
-
-    for log in logs:
-        risk = log.prediction
-        risk_distribution[risk] = risk_distribution.get(risk, 0) + 1
-
-    return {
-        "total_predictions": len(logs),
-        "risk_distribution": risk_distribution,
-        "average_confidence": round(sum(log.confidence or 0 for log in logs) / len(logs), 3),
-        "average_score": round(sum(log.score for log in logs) / len(logs), 2),
-        "average_failed_skills": round(sum(log.failed_skills_count for log in logs) / len(logs), 2),
     }
 
 
