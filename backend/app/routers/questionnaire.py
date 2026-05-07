@@ -73,6 +73,21 @@ def submit_questionnaire(
     db.commit()
     db.refresh(result)
 
+    monitoring_log = ModelMonitoringLog(
+        user_id=current_user.id,
+        questionnaire_result_id=result.id,
+        age_group=body.age_group,
+        gender=body.gender,
+        input_answers=answers_dict,
+        prediction=ml_risk,
+        confidence=ml_confidence,
+        score=score,
+        failed_skills_count=len(failed_skills),
+    )
+
+    db.add(monitoring_log)
+    db.commit()
+
     return QuestionnaireSubmitResponse(
         result_id=result.id,
         prediction=PredictionResult(
