@@ -668,7 +668,8 @@ body{
 .return-home-body{
   min-height: 100vh;
   margin: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #F3F8FF;
   direction: rtl;
 }
@@ -679,7 +680,7 @@ body{
     radial-gradient(circle at top right, rgba(141,162,201,0.18), transparent 18%),
     radial-gradient(circle at bottom left, rgba(216,168,184,0.14), transparent 16%),
     #F3F8FF;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* top bar */
@@ -746,7 +747,7 @@ body{
   padding: 22px 24px 24px;
   box-sizing: border-box;
   align-items: stretch;
-  height: calc(100vh - 82px);
+  min-height: calc(100vh - 82px);
 }
 
 /* side panel */
